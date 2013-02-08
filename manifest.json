@@ -1,0 +1,13 @@
+{
+  "name": "JSON Finder",
+	"version": "0.0.1",
+	"manifest_version": 2,
+	"description": "Browse JSON like you do it in Finder.",
+	"content_scripts": [{
+		"matches": ["<all_urls>"],
+		"js": ["content.js"],
+		"run_at" : "document_start"
+	}],
+	"homepage_url": "https://github.com/rapee/jsonfinder",
+	"web_accessible_resources": ["style.css"]
+}
