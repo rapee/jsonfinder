@@ -1,0 +1,148 @@
+body {
+  background: #fff;
+	margin: 0;
+}
+
+#json_viewer {
+	font-family: "Lucida Grande", Menlo, Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;
+	font-size: 12px;
+}
+.folder-frame {
+	background: #eee;
+}
+.folder-frame > .wrapper {
+	display: -webkit-box;
+	-webkit-box-align: stretch;
+}
+.folder-view {
+	width: 350px;
+	height: 100%;
+	border-right: 1px solid #ccc;
+	background: #fff;
+}
+.folder-item-list {
+	display: block;
+	padding: 0;
+	margin: 0;
+}
+.folder-item {
+	display: block;
+	cursor: pointer;
+}
+.folder-hassub-arrow {
+	/*float: right;*/
+}
+.folder-hassub-arrow::before {
+	content: "▶";
+	color: #999;
+	font-style: normal;
+	font-size: 0.5em;
+	line-height: 2.5em;
+	float: right;
+	margin-left: 10px;
+}
+
+
+
+.json-property {
+	display: -webkit-box;
+	-webkit-box-align: stretch;
+}
+.folder-item:hover .json-property {
+	background-color: #f3f9ff;
+}
+.folder-item.selected .json-property {
+	background-color: #ddeeff;
+}
+.folder-item.focus .json-property {
+	background-color: #2277ee;
+}
+.json-keyname {
+	-webkit-box-flex: 0;
+	min-width: 100px;
+	padding: 3px 6px;
+}
+.json-value {
+	-webkit-box-flex: 1;
+	padding: 3px 6px;
+	text-align: left;
+	position: relative;
+}
+.focus > .json-property > .json-keyname,
+.focus > .json-property > .json-value,
+.focus > .json-property > .json-value::before,
+.focus > .json-property > .json-value::after,
+.focus > .json-property .folder-hassub-arrow::before
+{
+	color: #fff !important;
+}
+
+
+.datatype-boolean {
+	color: #8800cc;
+}
+.datatype-string {
+	color: #cc3300;
+}
+.datatype-string::before {
+	content: '"';
+}
+.datatype-string::after {
+	content: '"';
+}
+.datatype-number {
+	color: #8800cc;
+}
+.datatype-array {
+	/*color: #8800cc;*/
+}
+.datatype-array::after {
+	content: "Array";
+	float: right;
+	color: #999999;
+	font-style: italic;
+}
+.datatype-object {
+	/*color: #8800cc;*/
+}
+.datatype-object::after {
+	content: "Object";
+	float: right;
+	color: #999999;
+	font-style: italic;
+}
+
+
+.wrapper.scrollable-vertical {
+	overflow-y: auto;
+	height: 100%;
+}
+
+
+/* toolbar */
+
+.hideout-toolbar {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: rgba(0,0,0,.7);
+	padding: 5px;
+	border-radius: 0 0 10px 0;
+	z-index: 100;
+}
+
+.toolbar input[name="url"] {
+	width: 150px;
+}
+.toolbar input[name="url"]:focus {
+	width: 300px;
+}
+
+
+input[type="url"] {
+	background: transparent;
+	font-size: 16px;
+	border: none;
+	outline: none;
+	color: #fff;
+}
