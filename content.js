@@ -33,7 +33,7 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 		var newstyle = document.createElement('link');
 		newstyle.rel = 'stylesheet';
 		newstyle.type = 'text/css';
-		newstyle.href = 'chrome-extension://olojfffcibppbaaifagihkfpfeegggem/style.css';
+		newstyle.href = chrome.extension.getURL('/style.css');
 		document.head.appendChild(newstyle);
 
 		var json;
