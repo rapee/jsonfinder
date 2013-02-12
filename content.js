@@ -10,7 +10,9 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 
 /* JSON Finder Chrome Extension */
 (function() {
+
 	var pre;
+	var json;
 
 	function createJsonFinderView(json) {
 
@@ -29,6 +31,29 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 	}
 
 	function domready() {
+
+		if (document.body && (document.body.childNodes[0] && document.body.childNodes[0].tagName == "PRE" || document.body.children.length == 0)) {
+			pre = document.body.children.length ? document.body.childNodes[0] : document.body;
+			try {
+				// hide original pre early
+				pre.style.display = 'none';
+				rawtext = pre.innerText;
+				json = JSON.parse(rawtext);
+
+			} catch(e) {
+				onError("cannot parse data as JSON");
+				return;
+			}
+			// start JSON view mode
+			beginJSONViewer();
+		}
+	}
+
+	function beginJSONViewer() {
+
+		// Create HTML
+		createJsonFinderView(json);
+
 		// Insert CSS
 		var newstyle = document.createElement('link');
 		newstyle.rel = 'stylesheet';
@@ -36,28 +61,13 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 		newstyle.href = chrome.extension.getURL('/style.css');
 		document.head.appendChild(newstyle);
 
-		var json;
-		pre = document.getElementsByTagName('pre')[0];
-		if(pre && pre.parentNode.childNodes.length == 1) {
-			try {
-				rawtext = pre.innerText;
-				json = JSON.parse(rawtext);
-				// hide original pre early
-				pre.style.display = 'none';
-				createJsonFinderView(json);
-
-			} catch(err) {
-				return;
-			}
-		} else {
-			onError();
-			return;
-		}	
 	}
 
-	function onError() {
+	function onError(err) {
 		// show original pre if error occured
-		delete pre.style.display;
+		if (pre) {
+			delete pre.style.display;
+		}
 	}
 	
   	document.addEventListener("DOMContentLoaded", domready, false);

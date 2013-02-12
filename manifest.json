@@ -1,6 +1,6 @@
 {
 	"name": "JSON Finder",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"manifest_version": 2,
 	"description": "Browse JSON like you do it in Finder.",
 	"icons": { 
