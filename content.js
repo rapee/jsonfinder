@@ -32,8 +32,8 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 
 	function domready() {
 
-		if (document.body && (document.body.childNodes[0] && document.body.childNodes[0].tagName == "PRE" || document.body.children.length == 0)) {
-			pre = document.body.children.length ? document.body.childNodes[0] : document.body;
+		if (document.body && document.body.childNodes[0] && document.body.childNodes[0].tagName == "PRE") {
+			pre = document.body.childNodes[0];
 			try {
 				// hide original pre early
 				pre.style.display = 'none';
