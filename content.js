@@ -10,7 +10,7 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 
 /* JSON Finder Chrome Extension */
 (function() {
-  var pre;
+	var pre;
 
 	function createJsonFinderView(json) {
 
