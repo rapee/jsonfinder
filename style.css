@@ -10,11 +10,12 @@ body {
 	font-size: 12px;
 }
 .folder-frame {
-	background: #eee;
+	/*background: #eee;*/
 }
 .folder-frame > .wrapper {
 	display: -webkit-box;
 	-webkit-box-align: stretch;
+	overflow-x: auto;
 }
 .folder-view {
 	width: 350px;
@@ -123,12 +124,19 @@ body {
 
 /* toolbar */
 
+.toolbar {
+	padding: 5px;
+	/*background: rgba(0,0,0,.7);*/
+	background: #e6e6e6;
+	border: 1px solid #888;
+	border-top: none;
+	border-right: none;
+	box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
 .hideout-toolbar {
 	position: absolute;
 	top: 0;
 	left: 0;
-	background: rgba(0,0,0,.7);
-	padding: 5px;
 	border-radius: 0 0 10px 0;
 	z-index: 100;
 }
@@ -147,4 +155,18 @@ input[type="url"] {
 	border: none;
 	outline: none;
 	color: #fff;
+}
+
+#search_toolbar {
+	top: 0;
+	left: auto;
+	right: 0;
+	border-radius: 0 0 0 4px;
+}
+
+.search_status {
+	/*color: #fff;*/
+	font-size: 12px;
+	font-family: "Lucida Grande", Menlo, Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;
+	padding: 0 0 0 5px;
 }

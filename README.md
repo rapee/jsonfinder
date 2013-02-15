@@ -5,12 +5,20 @@ Browse JSON like you do it in Finder.
 * View JSON the same way you browse file system.
 * Column view helps you keep track of deep object or array.
 * Use mouse or arrow keys to navigate.
+* Find and jump to matched location in JSON.
+* Support browser back/forward.
 
 # Installation
 
 You can install from [Chrom Web Store here](https://www.google.co.jp/url?sa=t&rct=j&q=&esrc=s&source=web&cd=5&cad=rja&ved=0CE8QFjAE&url=https%3A%2F%2Fchrome.google.com%2Fwebstore%2Fdetail%2Fjson-finder%2Fflhdcaebggmmpnnaljiajhihdfconkbj%3Fhl%3Den&ei=_coZUfLNLoSEkgXHw4HQAQ&usg=AFQjCNG-zm83VZeuSmSP_4D2QuA-OYkPJg&sig2=LJBlfEycUhykYqTQ5vrSYw&bvm=bv.42261806,d.dGI).
 
 # Change Log
+
+0.0.4
+
+* ADD: Search key and value in JSON
+* ADD: Support history and hash change
+* FIX: CSS encoding bug
 
 0.0.3
 

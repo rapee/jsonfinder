@@ -13,6 +13,9 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 
 	var pre;
 	var json;
+	var json_viewer;
+	var current_keyword;
+	var current_search_index;
 
 	function createJsonFinderView(json) {
 
@@ -61,6 +64,13 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 		newstyle.href = chrome.extension.getURL('/style.css');
 		document.head.appendChild(newstyle);
 
+		// Insert search
+		var $searchTool = $('<div/>').attr('id', 'search_toolbar').addClass('toolbar hideout-toolbar').css({display: 'none'});
+		$searchTool.append($('<input type="search" name="searchbox" placeholder="Find"/>'));
+		$searchTool.append($('<span class="search_status"/>'));
+		document.body.appendChild($searchTool[0]);
+
+		initEvents();
 	}
 
 	function onError(err) {
@@ -70,50 +80,233 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 		}
 	}
 	
-  	document.addEventListener("DOMContentLoaded", domready, false);
+	document.addEventListener("DOMContentLoaded", domready, false);
 
 
-	function initEvents() {
-		$(document)
-		.on('keydown', function(e) {
+	function SearchToolbarEvents() {
+		this.namespace = 'searchTool';
+	}
+	SearchToolbarEvents.prototype = {
+		register: function(listener) {
+			this.listener = listener;
+			this.listener.namespaces[this.namespace] = this;
+
+			var events = {
+				'keydown': this.onSubmit
+			};
+			for (var ev in events) {
+				var evgroup = this.listener.events[ev] || {};
+				evgroup[this.namespace] = events[ev];
+				this.listener.events[ev] = evgroup;
+			}
+		},
+		deregister: function() {
+			if (!this.listener) return;
+			delete this.listener.namespaces[this.namespace];
+			for (var ev in this.listener.events) {
+				delete this.listener.events[ev][this.namespace];
+			}
+			this.listener = undefined;
+		},
+		onSubmit: function(e) {
 			switch (e.keyCode) {
-			case 27: // escape
-				e.stopPropagation();
-				var toolbar = $('#json_toolbar');
-				if (toolbar.css('display')==='none') {
-					toolbar.slideDown('fast');
-					toolbar.find('input[name="url"]').trigger('focus');
+				case 70: // F
+					if (e.metaKey) {
+						e.stopPropagation();
+						e.preventDefault();
+						$('#search_toolbar input[name="searchbox"]').trigger('select');
+					}
+					break;
+				case 27: // escape
+					var toolbar = $('#search_toolbar');
+					if (toolbar.css('display')!=='none') {
+						e.stopPropagation();
+						this.deregister();
+						toolbar.find('input[name="searchbox"]').trigger('blur');
+						toolbar.slideUp(150);
+					}
+					break;
+				case 13: // enter
+					e.stopPropagation();
+					this.searchNext(e.shiftKey ?-1:1);
 
+					break;
+			}
+		},
+
+		searchNext: function(dir) {
+			var dir = dir || 1; // +1 next, -1 previous
+			var input = $('#search_toolbar input[name="searchbox"]');
+			input.select();
+			var keyword = input.val();
+
+			if (keyword == '') return;
+			
+			if (current_keyword !== keyword) {
+				current_keyword = keyword;
+				current_search_results = this.searchJSON(keyword, json);
+				current_search_index = 0;
+			} else if (current_search_results.length > 0) {
+				current_search_index = (current_search_index+dir);
+				if (current_search_index >= 0) current_search_index = current_search_index % current_search_results.length;
+				else current_search_index = current_search_results.length-1;
+			} else {
+				current_search_index = 0;
+				current_search_results = [];
+			}
+			// show match
+			if (current_search_results.length > 0) {
+				$('.search_status').text((current_search_index+1) + ' of ' + current_search_results.length);
+				
+				var location = current_search_results[current_search_index];
+				var paths = location[0].split('.');
+				var isValue = !!location[1];
+				var match_pos = location[2];
+
+				json_viewer.openPath(location[0]);
+
+				// update hash
+				history.pushState({}, '', '#'+json_viewer.path());
+
+			} else {
+				$('.search_status').text('0 of 0');
+			}
+		},
+
+		searchJSON: function(keyword, json) {
+			// must not contain cyclic link e.g. reference to item in this tree
+			var results = [];
+			var q = [];
+			shallowPush(json, "", q);
+			while (q.length > 0) {
+				var pos;
+				var item = q.shift();
+				var key = item[0];
+				var value = item[1];
+				var path = item[2];
+
+				switch (typeof value) {
+				// case 'boolean':
+				// 	break;
+				// case 'number':
+				// 	break;
+				// case 'string':
+				// 	break;
+				// case 'function':
+				// 	break;
+				case 'object':
+					shallowPush(value, path, q);
+					break;
+				default:
+				}
+
+				// match key
+				pos = key.indexOf(keyword);
+				if (pos >= 0) {
+					results.push([ path, 0, pos ]);
+				}
+				if (['boolean', 'number', 'string'].indexOf(typeof value) >= 0) {
+					pos = value.toString().indexOf(keyword);
+					if (pos >= 0) {
+						results.push([ path, 1, pos ]);
+					}
+				}
+			}
+
+			function shallowPush(obj, path, q) {
+				var prefix = path ? path+".":"";
+				if (Array.isArray(obj)) {
+					obj.forEach(function(val, key) {
+						q.push([ key.toString(), val, prefix+key ]);
+					});
 				} else {
-					toolbar.slideUp('fast', function() {
-						$(this).find('input[name="url"]').trigger('blur');
+					Object.keys(obj).forEach(function(key) {
+						q.push([ key, obj[key], prefix+key ]);
 					});
 				}
-				break;
-			case 13: // enter
-				e.stopPropagation();
-				var url = $(this).find('input[name="url"]');
-				if (!url.match(/^[a-z]+:\/\/.+$/)) return;
-				$.get(url.val())
-				.done(function(data) {
-					app.view.clear();
-					var new_root_folder = new FolderView(data);
-					app.view.empty();
-					app.view.push(new_root_folder);
-					// clear input
-					url.val('');
-					// close toolbar by simulate ESC
-					var keydownEvent = jQuery.Event("keydown");
-					keydownEvent.which = keydownEvent.keyCode = 27;
-					$(document).trigger(keydownEvent);
-				})
-				.fail(function(e) {
-					console.error(e);
-				})
-				.always(function() {});
-				break;
 			}
-		})
+			return results;
+		}
+	};
+
+	function initEvents() {
+		var listener = {
+			events: {},
+			namespaces: {}
+		};
+		var searchEvents = new SearchToolbarEvents();
+
+		$(document)
+		.on('keydown', function(e) {
+			for (var ns in listener.events.keydown) {
+				if (e.isPropagationStopped()) break;
+				listener.events.keydown[ns].call(listener.namespaces[ns], e);
+			}
+
+			if (!e.isPropagationStopped()) {
+				switch (e.keyCode) {
+				case 70: // F
+					if (e.metaKey) {
+						// stop browser default Find shortcut key
+						var toolbar = $('#search_toolbar');
+						if (toolbar.css('display')==='none') {
+							e.preventDefault();
+							searchEvents.register(listener);
+							toolbar.slideDown(100);
+							toolbar.find('input[name="searchbox"]').trigger('select');
+						}
+					}
+					break;
+				case 27: // escape
+				// 	var toolbar = $('#json_toolbar');
+				// 	if (toolbar.css('display')==='none') {
+				// 		e.stopPropagation();
+				// 		toolbar.slideDown('fast');
+				// 		toolbar.find('input[name="url"]').trigger('focus');
+
+				// 	} else {
+				// 		e.stopPropagation();
+				// 		toolbar.slideUp('fast', function() {
+				// 			$(this).find('input[name="url"]').trigger('blur');
+				// 		});
+				// 	}
+					break;
+				case 13: // enter
+					/*
+					e.stopPropagation();
+					var url = $(this).find('input[name="url"]');
+					if (!url.match(/^[a-z]+:\/\/.+$/)) return;
+					$.get(url.val())
+					.done(function(data) {
+						app.view.clear();
+						var new_root_folder = new FolderView(data);
+						app.view.empty();
+						app.view.push(new_root_folder);
+						// clear input
+						url.val('');
+						// close toolbar by simulate ESC
+						var keydownEvent = jQuery.Event("keydown");
+						keydownEvent.which = keydownEvent.keyCode = 27;
+						$(document).trigger(keydownEvent);
+					})
+					.fail(function(e) {
+						console.error(e);
+					})
+					.always(function() {});
+					*/
+					break;
+
+				}
+			}
+		});
+
+		//- Open tab
+		$(window).on('hashchange', function(e) {
+			var hash = window.location.hash.substr(1);
+			if (hash) {
+				json_viewer.openPath(hash);
+			}
+		}).trigger('hashchange');
 	}
 
 	function FolderView(dom, parent, child, selected) {
@@ -138,11 +331,22 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 			self.dom
 			.on('click', '.folder-item', function(e) {
 				self.focus(this);
+				// update hash
+				history.pushState({}, '', '#'+self.containerView.path());
 			});
 		},
-		focus: function(item) {
+		focus: function(key) {
 			var self = this;
-			var $item = $(item);
+			var $item;
+			if (typeof key === 'string') {
+				$item = self.dom.find('.json-keyname[data-key="'+key+'"]').parents('.folder-item');
+			} else {
+				$item = $(key);
+			}
+			if ($item.length === 0) return;
+
+			// make selection
+			self.selected = $item;
 			$item.addClass('focus selected').siblings().removeClass('selected');
 			var value = $item.data('value');
 			if (typeof value === 'object') {
@@ -153,8 +357,14 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 			}
 			self.containerView.focusItem && self.containerView.focusItem.removeClass('focus');
 			self.containerView.focus($item);
+
+			var wrapper = self.containerView.dom.children('.wrapper')[0];
+			wrapper.scrollLeft = Math.max(0, ($item.position().left+$item.outerWidth()*4)-$(window).outerWidth());//$item.offset().left;
+
 		},
 		unfocus: function() {
+			// deselection
+			self.selected = undefined;
 			this.dom.find('.folder-item').removeClass('focus selected');
 		}
 	};
@@ -174,6 +384,15 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 		get: function(i) { return this.folderViews[i]; },
 		current: function() { return this.get(this.folderViews.length-1); },
 		root: function() { return this.get(0); },
+		path: function() {
+			var path = [];
+			var folder = this.root();
+			while (folder && folder.selected) {
+				path.push(folder.selected.find('.json-keyname').data('key'));
+				folder = folder.child;
+			}
+			return path.join('.');
+		},
 		push: function(folderview) {
 			folderview.child = null;
 			folderview.parent = this.current();
@@ -206,34 +425,52 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 			return true;
 		},
 
+		openPath: function(jsonPath) {
+			var paths = jsonPath.split('.');
+			this.popTo(0);
+			var current_folder = new FolderView(json);
+			this.push(current_folder);
+			for (var i = 0; i<paths.length; i++) {
+				this.current().focus(paths[i]);
+			}
+		},
+
 		bindEvents: function() {
 			var self = this;
 			$(document)
 			.on('keydown', function(e) {
-				// e.stopPropagation();
-				// console.log(e.keyCode);
 				switch(e.keyCode) {
 					case 39: // arrow right
-						e.stopPropagation();
-						var focusItem = self.focus();
-						if (!focusItem) {
-							self.root() && self.root().dom.find('.folder-item:first').trigger('click');
-						} else {
-							var focusFolder = focusItem.parents('.folder-view').data('view');
-							if (focusFolder && focusFolder.child) focusFolder.child.dom.find('.folder-item:first').trigger('click');
+						// On OSX: Option+ARROW_RIGHT = Go next
+						// We want to keep this default behavior
+						if (!e.metaKey) {
+							e.stopPropagation();
+							var focusItem = self.focus();
+							if (!focusItem) {
+								self.root() && self.root().dom.find('.folder-item:first').trigger('click');
+							} else {
+								var focusFolder = focusItem.parents('.folder-view').data('view');
+								if (focusFolder && focusFolder.child) focusFolder.child.dom.find('.folder-item:first').trigger('click');
+							}
 						}
 						break;
 					case 37: // arrow left
 					// case 27: // escape
 					// case 8: // backspace
-						e.stopPropagation();
-						var focusItem = self.focus();
-						if (!focusItem) break;
-						var focusFolder = focusItem.parents('.folder-view').data('view');
-						if (focusFolder && focusFolder.parent) {
-							focusFolder.parent.dom.find('.folder-item.selected:first').trigger('click');
-						} else {
-							self.unfocus();
+
+						// On OSX: Option+ARROW_LEFT = Go back
+						// We want to keep this default behavior
+						if (!e.metaKey) {
+							// 
+							e.stopPropagation();
+							var focusItem = self.focus();
+							if (!focusItem) break;
+							var focusFolder = focusItem.parents('.folder-view').data('view');
+							if (focusFolder && focusFolder.parent) {
+								focusFolder.parent.dom.find('.folder-item.selected:first').trigger('click');
+							} else {
+								self.unfocus();
+							}
 						}
 						break;
 					case 38: // arrow up
@@ -313,7 +550,7 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 			}
 			item = $('<li/>').addClass('folder-item')
 				.append($('<div class="json-property"/>')
-					.append($('<div class="json-keyname"/>').text(key))
+					.append($('<div class="json-keyname"/>').attr('data-key', key).text(key))
 					.append(item)
 			);
 			item.data('value', value);
