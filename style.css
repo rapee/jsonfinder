@@ -96,6 +96,12 @@ body {
 .datatype-number {
 	color: #8800cc;
 }
+.datatype-null {
+	color: #999999;
+}
+.datatype-null::after {
+	content: "null";
+}
 .datatype-array {
 	/*color: #8800cc;*/
 }

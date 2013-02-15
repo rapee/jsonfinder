@@ -195,7 +195,9 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 				// case 'function':
 				// 	break;
 				case 'object':
-					shallowPush(value, path, q);
+					if (value !== null) {
+						shallowPush(value, path, q);
+					}
 					break;
 				default:
 				}
@@ -320,7 +322,7 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 	}
 	FolderView.prototype = {
 		parse: function(json) {
-			if (typeof json !== 'object') return "";
+			if (json === null || typeof json !== 'object') return "";
 			return jsonToFinderView(json).get(0);
 		},
 		depth: function() {
@@ -537,7 +539,9 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 				break;
 			case 'object':
 				// array or object
-				if (Array.isArray(value)) {
+				if (value === null) {
+					item.addClass('datatype-null').text("");
+				} else if (Array.isArray(value)) {
 					item.addClass('datatype-array').text("")
 						.append('<i class="folder-hassub-arrow"/>');
 				} else {
