@@ -2,15 +2,20 @@
 
 Browse JSON like you do it in Finder.
 
-* View JSON the same way you browse file system.
-* Column view helps you keep track of deep object or array.
-* Use mouse or arrow keys to navigate.
-* Find and jump to matched location in JSON. (Press **`⌘+F`** on OSX)
+* View as if you browse file system.
+* Good for even large JSON: column view helps you keep track of deep object or array.
+* Find in JSON. (Press ⌘+F on OSX)
+* Jump to matches. 
+* Mouse or arrow keys to navigate.
 * Support browser back/forward.
 
 # Installation
 
 You can install from [Chrom Web Store here](https://www.google.co.jp/url?sa=t&rct=j&q=&esrc=s&source=web&cd=5&cad=rja&ved=0CE8QFjAE&url=https%3A%2F%2Fchrome.google.com%2Fwebstore%2Fdetail%2Fjson-finder%2Fflhdcaebggmmpnnaljiajhihdfconkbj%3Fhl%3Den&ei=_coZUfLNLoSEkgXHw4HQAQ&usg=AFQjCNG-zm83VZeuSmSP_4D2QuA-OYkPJg&sig2=LJBlfEycUhykYqTQ5vrSYw&bvm=bv.42261806,d.dGI).
+
+# Sample JSON
+
+* [http://earthquake.usgs.gov/earthquakes/feed/geojson/2.5/day](http://earthquake.usgs.gov/earthquakes/feed/geojson/2.5/day)
 
 # Change Log
 
