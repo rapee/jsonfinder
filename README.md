@@ -14,6 +14,10 @@ You can install from [Chrom Web Store here](https://www.google.co.jp/url?sa=t&rc
 
 # Change Log
 
+0.0.5
+
+* FIX: null bug
+
 0.0.4
 
 * ADD: Search key and value in JSON
