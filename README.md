@@ -5,7 +5,7 @@ Browse JSON like you do it in Finder.
 * View JSON the same way you browse file system.
 * Column view helps you keep track of deep object or array.
 * Use mouse or arrow keys to navigate.
-* Find and jump to matched location in JSON.
+* Find and jump to matched location in JSON. (Press **`⌘+F`** on OSX)
 * Support browser back/forward.
 
 # Installation
