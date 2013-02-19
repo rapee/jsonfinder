@@ -76,7 +76,7 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 	function onError(err) {
 		// show original pre if error occured
 		if (pre) {
-			delete pre.style.display;
+			pre.style.display = '';
 		}
 	}
 	
