@@ -70,6 +70,9 @@ body {
 	padding: 3px 6px;
 	text-align: left;
 	position: relative;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 .focus > .json-property > .json-keyname,
 .focus > .json-property > .json-value,

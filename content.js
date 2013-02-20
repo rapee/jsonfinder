@@ -531,26 +531,40 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 
 			switch (typeof value) {
 			case 'boolean':
-				item.addClass('datatype-boolean').text(value);
+				item
+					.attr('title', value)
+					.addClass('datatype-boolean').text(value);
 				break;
 			case 'number':
-				item.addClass('datatype-number').text(value);
+				item
+					.attr('title', value)
+					.addClass('datatype-number').text(value);
 				break;
 			case 'string':
-				item.addClass('datatype-string').text(value);
+				item
+					.attr('title', value)
+					.addClass('datatype-string').text(value);
 				break;
 			case 'function':
-				item.addClass('datatype-function').text(value.toString());
+				item
+					.attr('title', value.toString())
+					.addClass('datatype-function').text(value.toString());
 				break;
 			case 'object':
 				// array or object
 				if (value === null) {
-					item.addClass('datatype-null').text("");
+					item
+					.attr('title', 'null')
+					.addClass('datatype-null').text("");
 				} else if (Array.isArray(value)) {
-					item.addClass('datatype-array').text("")
+					item
+					.attr('title', 'Array')
+					.addClass('datatype-array').text("")
 						.append('<i class="folder-hassub-arrow"/>');
 				} else {
-					item.addClass('datatype-object').text("")
+					item
+					.attr('title', 'Object')
+					.addClass('datatype-object').text("")
 						.append('<i class="folder-hassub-arrow"/>');
 				}
 				break;
