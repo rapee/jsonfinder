@@ -196,7 +196,7 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 				// 	break;
 				case 'object':
 					if (value !== null) {
-						shallowPush(value, path, q);
+						shallowPushBefore(value, path, q);
 					}
 					break;
 				default:
@@ -215,17 +215,22 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 				}
 			}
 
-			function shallowPush(obj, path, q) {
+			function shallowPush(obj, path, q) { return shallowAdd(obj, path, q, 'push'); }
+			function shallowPushBefore(obj, path, q) { return shallowAdd(obj, path, q, 'unshift'); }
+			function shallowAdd(obj, path, q, verb) {
+				var verb = verb || 'push';
 				var prefix = path ? path+".":"";
+				var itemlist = [];
 				if (Array.isArray(obj)) {
 					obj.forEach(function(val, key) {
-						q.push([ key.toString(), val, prefix+key ]);
+						itemlist.push([ key.toString(), val, prefix+key ]);
 					});
 				} else {
 					Object.keys(obj).forEach(function(key) {
-						q.push([ key, obj[key], prefix+key ]);
+						itemlist.push([ key, obj[key], prefix+key ]);
 					});
 				}
+				q[verb].apply(q, itemlist);
 			}
 			return results;
 		}
