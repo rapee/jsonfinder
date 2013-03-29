@@ -2,12 +2,18 @@
 
 body {
 	background: #fff;
+	color: #444;
 	margin: 0;
+	font-family: "Lucida Grande", Menlo, Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;
 }
 
 #json_viewer {
-	font-family: "Lucida Grande", Menlo, Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;
 	font-size: 12px;
+	position: absolute;
+	top: 25px;
+	left: 0;
+	right: 0;
+	bottom: 0;
 }
 .folder-frame {
 	/*background: #eee;*/
@@ -176,6 +182,83 @@ input[type="url"] {
 .search_status {
 	/*color: #fff;*/
 	font-size: 12px;
-	font-family: "Lucida Grande", Menlo, Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;
 	padding: 0 0 0 5px;
+}
+
+
+#status_toolbar {
+	padding: 0;
+	margin: 0;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	background: none;
+	/*height: 24px;*/
+}
+.breadcrumb_list {
+	padding: 0;
+	margin: 0;
+	background-color: #eee;
+}
+.breadcrumb_item {
+	padding: 0;
+	margin: 0;
+	display: inline-block;
+	position: relative;
+	overflow: hidden;
+	/*background-color: #ddd;*/
+}
+.breadcrumb_item:first-child a,
+.breadcrumb_item:first-child span {
+	padding-left: 10px;
+}
+.breadcrumb_item span,
+.breadcrumb_item a {
+	display: inline-block;
+	padding: 0 0;
+	/*min-width: 20px;*/
+	text-align: left;
+	font-size: 12px;
+	line-height: 2em;
+	text-decoration: none;
+	color: #444;
+	background-color: #ddd;
+}
+/*.breadcrumb_item a:hover {*/
+.breadcrumb_item.hover a {
+	background-color: #f3f3f3;
+}
+.breadcrumb_item.selected span,
+.breadcrumb_item.selected a,
+.breadcrumb_item.selected a:hover,
+.breadcrumb_item.selected a:focus {
+	background-color: #eee;
+}
+.breadcrumb_item.selected:first-child a,
+.breadcrumb_item.selected:first-child a:hover,
+.breadcrumb_item.selected:first-child a:focus {
+	background-color: #eee;
+}
+.breadcrumb_item + .breadcrumb_item a,
+.breadcrumb_item + .breadcrumb_item span {
+	padding-left: 20px;
+}
+.breadcrumb_item + .breadcrumb_item::before {
+	display: block;
+	content: '';
+	background-color: #ddd;
+	border-top: 1px solid #888;
+	border-right: 1px solid #888;
+	width: 24px;
+	height: 24px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	box-shadow: inset 1px 1px 1px rgba(0,0,0,.2), 1px 1px rgba(255,255,255,1);
+	-webkit-transform: translate(-15px, 0)rotate(45deg);
+}
+
+.breadcrumb_item.hover + .breadcrumb_item::before {
+	background-color: #f3f3f3;
 }

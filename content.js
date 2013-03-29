@@ -17,22 +17,6 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 	var current_keyword;
 	var current_search_index;
 
-	function createJsonFinderView(json) {
-
-		// Remove old pre
-		document.body.removeChild(pre);
-
-		// Insert html
-		var newcontent = $('<div/>').attr('id', 'json_viewer');
-		document.body.appendChild(newcontent[0]);
-
-		// Generate viewer
-		var first_folder = new FolderView(json);
-		json_viewer = new JsonFinderView(newcontent);
-		json_viewer.push(first_folder);
-
-	}
-
 	function domready() {
 
 		if (document.body && document.body.childNodes[0] && document.body.childNodes[0].tagName == "PRE") {
@@ -53,10 +37,6 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 	}
 
 	function beginJSONViewer() {
-
-		// Create HTML
-		createJsonFinderView(json);
-
 		// Insert CSS
 		var newstyle = document.createElement('link');
 		newstyle.rel = 'stylesheet';
@@ -64,13 +44,78 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 		newstyle.href = chrome.extension.getURL('/style.css');
 		document.head.appendChild(newstyle);
 
+		// Remove old pre
+		document.body.removeChild(pre);
+
+		// Insert html
+		var newcontent = $('<div/>').attr('id', 'json_viewer');
+		document.body.appendChild(newcontent[0]);
+
+		// Generate viewer
+		var first_folder = new FolderView(json);
+		json_viewer = new JsonFinderView(newcontent);
+		json_viewer.push(first_folder);
+
+
 		// Insert search
+		createSearchToolbarView();
+
+		// Insert status
+		document.body.appendChild(json_viewer.statusbar_view.content[0]);
+
+		// Init events
+		initEvents();
+	}
+
+	function StatusbarView(paths) {
+		this.content = $('<div/>')
+			.attr('id', 'status_toolbar')
+			.addClass('toolbar');
+		this.path = paths || [];
+		this.bindEvents();
+		this.updatePath(this.path);
+	}
+	StatusbarView.prototype.bindEvents = function() {
+		$(this.content)
+		.on('mouseenter', '.breadcrumb_item', function(e) {
+			$(this).addClass('hover');
+		})
+		.on('mouseleave', '.breadcrumb_item', function(e) {
+			$(this).removeClass('hover');
+		});
+	}
+	StatusbarView.prototype.updatePath = function(paths) {
+		this.path = paths || this.path;
+		var self = this;
+		var dom = $('<ol>')
+			.addClass('breadcrumb_list')
+			.append(self.createItem('root', '', this.path.length===0));
+		this.path.forEach(function(name, i) {
+			dom.append(self.createItem(name, self.path.slice(0, i+1).join('.'), i+1===self.path.length));
+		});
+		this.content.empty().append(dom);
+	};
+	StatusbarView.prototype.createItem = function(name, path, selected) {
+		var body;
+		var item = $('<li>')
+			.addClass('breadcrumb_item');
+		if (path === '') item.addClass('root_item');
+		if (selected) {
+			item.addClass('selected');
+			body = $('<span>').text(name);
+		} else {
+			body = $('<a>')
+				.attr('href', '#'+path)
+				.text(name);
+			}
+		return item.append(body);
+	}
+
+	function createSearchToolbarView(json) {
 		var $searchTool = $('<div/>').attr('id', 'search_toolbar').addClass('toolbar hideout-toolbar').css({display: 'none'});
 		$searchTool.append($('<input type="search" name="searchbox" placeholder="Find"/>'));
 		$searchTool.append($('<span class="search_status"/>'));
 		document.body.appendChild($searchTool[0]);
-
-		initEvents();
 	}
 
 	function onError(err) {
@@ -166,7 +211,7 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 				json_viewer.openPath(location[0]);
 
 				// update hash
-				history.pushState({}, '', '#'+json_viewer.path());
+				history.pushState({}, '', '#'+json_viewer.path('.'));
 
 			} else {
 				$('.search_status').text('0 of 0');
@@ -310,7 +355,7 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 		//- Open tab
 		$(window).on('hashchange', function(e) {
 			var hash = window.location.hash.substr(1);
-			if (hash) {
+			if (typeof hash === 'string') {
 				json_viewer.openPath(hash);
 			}
 		}).trigger('hashchange');
@@ -337,15 +382,27 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 			var self = this;
 			self.dom
 			.on('click', '.folder-item', function(e) {
-				self.focus(this);
 				// update hash
-				history.pushState({}, '', '#'+self.containerView.path());
+				var paths = self.getPath(this);
+				self.containerView.openPath(paths);
+				history.pushState({}, '', '#'+paths.join('.'));
 			});
+		},
+		getPath: function(el) {
+			var $item = $(el);
+			var paths = [$item.find('.json-keyname').data('key')];
+			var current = this;
+			while (current.parent) {
+				current = current.parent;
+				paths.unshift(current.selected.find('.json-keyname').data('key'));
+			}
+			return paths;
 		},
 		focus: function(key) {
 			var self = this;
 			var $item;
-			if (typeof key === 'string') {
+			// object key or array index
+			if (typeof key === 'string' || typeof key === 'number') {
 				$item = self.dom.find('.json-keyname[data-key="'+key+'"]').parents('.folder-item');
 			} else {
 				$item = $(key);
@@ -383,6 +440,7 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 		this.dom.data('view', this);
 		this.folderViews = [];
 		this.focusItem = null;
+		this.statusbar_view = new StatusbarView();;
 		this.bindEvents();
 	}
 	JsonFinderView.prototype = {
@@ -391,14 +449,14 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 		get: function(i) { return this.folderViews[i]; },
 		current: function() { return this.get(this.folderViews.length-1); },
 		root: function() { return this.get(0); },
-		path: function() {
+		path: function(delimiter) {
 			var path = [];
 			var folder = this.root();
 			while (folder && folder.selected) {
 				path.push(folder.selected.find('.json-keyname').data('key'));
 				folder = folder.child;
 			}
-			return path.join('.');
+			return typeof delimiter === 'undefined' ? path : path.join(delimiter);
 		},
 		push: function(folderview) {
 			folderview.child = null;
@@ -432,14 +490,18 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 			return true;
 		},
 
-		openPath: function(jsonPath) {
-			var paths = jsonPath.split('.');
+		openPath: function(paths) {
+			if (paths === '') paths = [];
+			if (typeof paths === 'string') paths = paths.split('.');
+			if (!Array.isArray(paths)) throw new Error('not a valid json path');
 			this.popTo(0);
 			var current_folder = new FolderView(json);
 			this.push(current_folder);
 			for (var i = 0; i<paths.length; i++) {
 				this.current().focus(paths[i]);
 			}
+			// update status bar
+			this.statusbar_view.updatePath(paths);
 		},
 
 		bindEvents: function() {
@@ -477,6 +539,8 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 								focusFolder.parent.dom.find('.folder-item.selected:first').trigger('click');
 							} else {
 								self.unfocus();
+								self.openPath([]);
+								history.pushState({}, '', '#');
 							}
 						}
 						break;
