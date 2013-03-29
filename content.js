@@ -641,7 +641,7 @@ return""===n?"1":n}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,li
 				} else if (Array.isArray(value)) {
 					item
 					.attr('title', 'Array')
-					.addClass('datatype-array').text("Array");
+					.addClass('datatype-array').text("Array ("+value.length+")");
 				} else {
 					item
 					.attr('title', 'Object')
