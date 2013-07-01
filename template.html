@@ -1,0 +1,59 @@
+
+
+<script type="text/template" id="template-app-window">
+  <div id="json-viewer" class="folder-frame">
+    <div class="wrapper"></div>
+  </div>
+  <div id="search-toolbar" class="toolbar"></div>
+  <div id="status-toolbar" class="toolbar"></div>
+</script>
+
+
+
+<script type="text/template" id="template-folder-pane">
+  <div class="wrapper scrollable-vertical">
+    <ul class="folder-item-list"></ul>
+  </div>
+  <i class="resize-handler"></i>
+</script>
+
+
+
+<script type="text/template" id="template-folder-item">
+  <li class="folder-item">
+    <div class="json-property">
+      <div class="json-keyname"></div>
+      <div class="json-value"></div>
+    </div>
+  </li>
+</script>
+
+
+
+<script type="text/template" id="template-path-bar">
+  <ol class="breadcrumb-list"></ol>
+</script>
+
+
+
+<script type="text/template" id="template-path-bar-item">
+  <% var path; %>
+  <% var cls = ['breadcrumb-item']; %>
+  <% var selected; if (selected) cls.push('selected'); %>
+  <% var root; if (root) cls.push('root_item'); %>
+  <% cls = cls.join(' '); %>
+  <li class="<%= cls %>">
+    <% if (selected) { %>
+      <span><%= key %></span>
+    <% } else { %>
+      <a href="#<%= path %>"><%= key %></a>
+    <% } %>
+  </li>
+</script>
+
+
+
+<script type="text/template" id="template-search-bar">
+  <input type="search" name="searchbox" placeholder="Find">
+  <span class="search-status"></span>
+</script>
