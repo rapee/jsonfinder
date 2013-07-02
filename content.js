@@ -539,15 +539,27 @@
         this.listenTo(this.model, 'destroy', this.remove);
       },
 
-      updateSelected: function() {
-        var selected = this.model.get('selected');
+      updateSelected: function(model, value, options) {
+        var selected = value || this.model.get('selected');
         if (!selected) {
-          this.$el.find('.folder-item').removeClass('selected');
+          this.$el.find('.folder-item').removeClass('selected focus');
         } else {
           this.$el.find('[data-key="'+selected+'"]')
             .addClass('selected')
             .siblings().removeClass('selected');
+
+          this.updateFocused(true);
         }
+      },
+
+      updateFocused: function(focused) {
+        if (focused) {
+          this.$('.folder-item.selected').addClass('focus')
+            .siblings().removeClass('focus');
+        } else {
+          this.$('.folder-item').removeClass('focus');
+        }
+        if (this.parent) this.parent.updateFocused();
       },
 
       render: function() {
@@ -633,7 +645,7 @@
         var item = e.currentTarget;
         // update hash
         var paths = $(item).data('paths');
-        // this.parent.model.router.navigate(paths.join('/'), {trigger: true});
+        // redirect
         Backbone.Router.prototype.navigate(paths.join('/'), {trigger: true});
       },
 
@@ -701,13 +713,16 @@
       },
 
       addPane: function(model, collection, options) {
-        var view = new FolderPaneView({ model: model, parent: this });
+        var parent = collection.at(collection.length-2);
+        var view = new FolderPaneView({ model: model, parent: parent && parent.view });
+        model.view = view;
         this.$wrapper.append(view.render().el);
         this.scrollToSelected();
       },
 
       removePane: function(model, collection, options) {
         this.$wrapper.find('.folder-view-'+model.get('order')).remove();
+        delete model.view;
       },
 
       scrollToSelected: function() {
@@ -778,25 +793,29 @@
         var prevpaths = this.get('paths') || [];
         var prevstack = _stack.length;
         var addpaths, parentpaths;
-        var common = 0, branch = 0, remove;
+        var common = 0, remove;
         // get previous path
         for (var i=0; i<paths.length; i++) {
           if (paths[i] === prevpaths[i]) {
-            branch++;
             common++;
           } else {
             break;
           }
         }
+        if (common >= paths.length) {
+          common = paths.length-1;
+        }
         // remove panes
         remove = prevstack - common - 1;
+        remove = _stack.length-remove>0 ? remove : _stack.length-1;
         for (i=remove; i>0; i--) {
           _stack.remove(_stack.last());
         }
         // update common parent selection
         if (_stack.length > 0) {
           json = _stack.last().get('data');
-          _stack.last().set('selected', paths[branch]);
+          _stack.last().set('selected', null); // force trigger change:selected
+          _stack.last().set('selected', paths[common]);
         }
 
         // add panes
