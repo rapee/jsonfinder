@@ -400,30 +400,27 @@
         var dir = dir || 1; // +1 next, -1 previous
         var json = this.model.get('stack').first().get('data') || {};
         var keyword = this.$input.val();
-        var current_keyword = this.current_keyword;
-        var current_search_index = this.current_search_index;
-        var current_search_results = this.current_search_results;
         this.$input.select();
 
         if (keyword == '') return;
         
-        if (current_keyword !== keyword) {
-          current_keyword = keyword;
-          current_search_results = this.searchJSON(keyword, json);
-          current_search_index = 0;
-        } else if (current_search_results.length > 0) {
-          current_search_index = (current_search_index+dir);
-          if (current_search_index >= 0) current_search_index = current_search_index % current_search_results.length;
-          else current_search_index = current_search_results.length-1;
+        if (this.current_keyword !== keyword) {
+          this.current_keyword = keyword;
+          this.current_search_results = this.searchJSON(keyword, json);
+          this.current_search_index = 0;
+        } else if (this.current_search_results.length > 0) {
+          this.current_search_index = (this.current_search_index+dir);
+          if (this.current_search_index >= 0) this.current_search_index = this.current_search_index % this.current_search_results.length;
+          else this.current_search_index = this.current_search_results.length-1;
         } else {
-          current_search_index = 0;
-          current_search_results = [];
+          this.current_search_index = 0;
+          this.current_search_results = [];
         }
         // show match
-        if (current_search_results.length > 0) {
-          $('.search-status').text((current_search_index+1) + ' of ' + current_search_results.length);
+        if (this.current_search_results.length > 0) {
+          $('.search-status').text((this.current_search_index+1) + ' of ' + this.current_search_results.length);
           
-          var location = current_search_results[current_search_index];
+          var location = this.current_search_results[this.current_search_index];
           var paths = location[0].split('.');
           var isValue = !!location[1];
           var match_pos = location[2];
