@@ -14,7 +14,9 @@ Install from [Chrom Web Store here](https://www.google.co.jp/url?sa=t&rct=j&q=&e
 
 # Sample JSON
 
-* [http://earthquake.usgs.gov/earthquakes/feed/geojson/2.5/day](http://earthquake.usgs.gov/earthquakes/feed/geojson/2.5/day)
+* [http://earthquake.usgs.gov/earthquakes/feed/geojson/all/day](http://earthquake.usgs.gov/earthquakes/feed/geojson/all/day)
+* [http://earthquake.usgs.gov/earthquakes/feed/geojson/all/week](http://earthquake.usgs.gov/earthquakes/feed/geojson/all/week)
+* [http://earthquake.usgs.gov/earthquakes/feed/geojson/all/month](http://earthquake.usgs.gov/earthquakes/feed/geojson/all/month)
 
 # Change Log
 
