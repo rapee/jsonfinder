@@ -208,9 +208,11 @@
             var searchbar = this.model.get('views').searchbar;
             if (searchbar.$el.css('display')!=='none') {
               e.stopPropagation();
-              // this.deregister();
-              searchbar.$input.trigger('blur');
-              searchbar.$el.slideUp(150);
+              searchbar.$el.slideUp(150, function() {
+                searchbar.$input.trigger('blur');
+              });
+              // hide highlight
+              this.model.highlightKeyword(null, null);
             }
             break;
           case 39: // arrow right
@@ -348,15 +350,13 @@
       template: _.template($('#template-search-bar').html()),
 
       events: {
-        'keydown': 'onkeydown'
+        'keydown': 'onkeydown',
+        'blur input[name="searchbox"]': 'resetSearch'
       },
 
       initialize: function() {
         this.render();
-
-        this.current_keyword = null;
-        this.current_search_index = null;
-        this.current_search_results = null;
+        this.resetSearch();
       },
 
       render: function() {
@@ -405,31 +405,42 @@
         if (keyword == '') return;
         
         if (this.current_keyword !== keyword) {
+          // new search
           this.current_keyword = keyword;
           this.current_search_results = this.searchJSON(keyword, json);
           this.current_search_index = 0;
         } else if (this.current_search_results.length > 0) {
+          // next match
           this.current_search_index = (this.current_search_index+dir);
           if (this.current_search_index >= 0) this.current_search_index = this.current_search_index % this.current_search_results.length;
           else this.current_search_index = this.current_search_results.length-1;
         } else {
-          this.current_search_index = 0;
-          this.current_search_results = [];
+          // no match
+          this.resetSearch();
         }
         // show match
         if (this.current_search_results.length > 0) {
           $('.search-status').text((this.current_search_index+1) + ' of ' + this.current_search_results.length);
           
           var location = this.current_search_results[this.current_search_index];
-          var paths = location[0].split('.');
+          var paths = location[0].split('/');
           var isValue = !!location[1];
           var match_pos = location[2];
 
           // update hash
           router.navigate(paths.join('/'), {trigger: true});
+          // make highlight
+          this.model.highlightKeyword(keyword, paths, isValue, match_pos);
         } else {
           $('.search-status').text('0 of 0');
         }
+      },
+
+      resetSearch: function() {
+        this.current_keyword = null;
+        this.current_search_index = null;
+        this.current_search_results = null;
+        $('.search-status').text('');
       },
 
       searchJSON: function(keyword, json) {
@@ -462,23 +473,32 @@
           }
 
           // match key
-          pos = key.indexOf(keyword);
-          if (pos >= 0) {
-            results.push([ path, 0, pos ]);
+          if (key) {
+            addMatch(key, keyword, 0, results);
           }
+          // match value
           if (['boolean', 'number', 'string'].indexOf(typeof value) >= 0) {
-            pos = value.toString().indexOf(keyword);
-            if (pos >= 0) {
-              results.push([ path, 1, pos ]);
-            }
+            addMatch(value.toString(), keyword, 1, results);
           }
+        }
+
+        function addMatch(str, keyword, isValue, results) {
+          var fromIndex = 0;
+          var pos;
+          do {
+            pos = str.indexOf(keyword, fromIndex);
+            if (pos >= 0) {
+              results.push([ path, isValue, pos ]);
+              fromIndex = pos+1;
+            }
+          } while (pos >= 0);
         }
 
         function shallowPush(obj, path, q) { return shallowAdd(obj, path, q, 'push'); }
         function shallowPushBefore(obj, path, q) { return shallowAdd(obj, path, q, 'unshift'); }
         function shallowAdd(obj, path, q, verb) {
           var verb = verb || 'push';
-          var prefix = path ? path+".":"";
+          var prefix = path ? path+'/':'';
           var itemlist = [];
           if (Array.isArray(obj)) {
             obj.forEach(function(val, key) {
@@ -515,6 +535,7 @@
 
         this.listenTo(this.model, 'change:data', this.render);
         this.listenTo(this.model, 'change:selected', this.updateSelected);
+        this.listenTo(this.model, 'change:highlight', this.updateHighlight);
         this.listenTo(this.model, 'destroy', this.remove);
       },
 
@@ -524,7 +545,7 @@
           this.$el.find('.folder-item').removeClass('selected');
         } else {
           this.$el.find('[data-key="'+selected+'"]')
-            .parents('.folder-item').addClass('selected')
+            .addClass('selected')
             .siblings().removeClass('selected');
         }
       },
@@ -544,10 +565,12 @@
           var item_key = item.find('.json-keyname');
           var item_value = item.find('.json-value');
 
-          item_key.attr('data-key', key).text(key);
+          item.attr('data-key', key);
           if (key === paths[paths.length-1]) item.addClass('focus');
           item.data('value', value);
           item.data('paths', paths.concat(key));
+
+          item_key.text(key);
 
           switch (typeof value) {
           case 'boolean':
@@ -612,6 +635,40 @@
         var paths = $(item).data('paths');
         // this.parent.model.router.navigate(paths.join('/'), {trigger: true});
         Backbone.Router.prototype.navigate(paths.join('/'), {trigger: true});
+      },
+
+      updateHighlight: function(model, value, options) {//keyword, keyname, isValue, pos) {
+        var keyword = value.keyword;
+        var keyname = value.keyname;
+        var isValue = value.isValue;
+        var pos = value.pos;
+        // reset to normal text when keyword is undefined
+        if (value && keyname && !keyword) {
+          var $item = this.$el.find('[data-key="'+keyname+'"]');
+          var $key = $item.find('.json-keyname');
+          $key.text($item.attr('data-key'));
+          var $value = $item.find('.json-value');
+          $value.text($value.attr('title'));
+          return;
+        }
+
+        // make text highlighted
+        var $field;
+        var $item = this.$el.find('[data-key="'+keyname+'"]');
+        if (isValue) {
+          $field = $item.find('.json-value');
+        } else {
+          $field = $item.find('.json-keyname');
+        }
+        var text = $field.text();
+        var str1 = text.substr(0, pos);
+        var str2 = text.substr(pos, keyword.length);
+        var str3 = text.substr(pos+keyword.length);
+        $field
+          .empty()
+          .append(str1)
+          .append($('<span class="keyword-match"/>').text(str2))
+          .append(str3);
       }
 
     });
@@ -757,6 +814,33 @@
         }
         // save new path
         this.set('paths', paths);
+      },
+
+      highlightKeyword: function(keyword, paths, isValue, pos) {
+        var folder;
+        var prev = this.get('highlight');
+        if (prev) {
+          // reset previous highlight, if any
+          folder = this.get('stack').at(prev[1].length-1);
+          if (folder) {
+            folder.set('highlight', {
+              keyname: prev[1][prev[1].length-1]
+            });
+          }
+        }
+        // make highlight
+        if (keyword && paths) {
+          this.set('highlight', arguments);
+          folder = this.get('stack').at(paths.length-1)
+          if (folder) {
+            folder.set('highlight', {
+              keyword: keyword,
+              keyname: paths[paths.length-1],
+              isValue: isValue,
+              pos: pos
+            });
+          }
+        }
       }
 
     });
