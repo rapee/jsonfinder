@@ -20,6 +20,10 @@ Install from [Chrom Web Store here](https://www.google.co.jp/url?sa=t&rct=j&q=&e
 
 # Change Log
 
+0.0.8
+
+* NEW: Highlight matched keyword when search
+
 0.0.7
 
 * NEW: Migrate codebase to [Backbone.js](https://github.com/documentcloud/backbone) (v1.0.0)

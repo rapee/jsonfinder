@@ -28,7 +28,6 @@ body {
 	position: relative;
 	width: 250px;
 	min-width: 100px;
-	max-width: 500px;
 	height: 100%;
 	border-right: 1px solid #ccc;
 	background: #fff;
@@ -140,6 +139,14 @@ body {
 .datatype-object {
 	color: #999999;
 	text-align: right;
+}
+
+.keyword-match {
+	background: rgba(255,255,0,.5);
+	border-radius: 4px;
+	box-shadow: 0 1px 1px rgba(0,0,0,.2);
+	padding: 0 3px;
+	margin: 0 -3px;
 }
 
 
