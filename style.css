@@ -1,6 +1,6 @@
 @charset "UTF-8";
 
-body {
+.wrapper {
 	background: #fff;
 	color: #444;
 	margin: 0;
