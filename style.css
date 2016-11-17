@@ -1,13 +1,10 @@
 @charset "UTF-8";
 
-body {
-	background: #fff;
-	color: #444;
-	margin: 0;
-	font-family: "Lucida Grande", Menlo, Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;
-}
-
 #json-finder-app {
+        background: #fff;
+        color: #444;
+        margin: 0;
+        font-family: "Lucida Grande", Menlo, Monaco,"Courier New","DejaVu Sans Mono","Bitstream Vera Sans Mono",monospace;
 	font-size: 12px;
 	position: absolute;
 	top: 25px;
