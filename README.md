@@ -20,6 +20,14 @@ Install from [Chrom Web Store here](https://www.google.co.jp/url?sa=t&rct=j&q=&e
 
 # Change Log
 
+0.1.0
+
+* FIX: Scoped CSS, stop breaking CSS on other sites.
+
+0.0.9
+
+* FIX: Minor bugs fixed
+
 0.0.8
 
 * NEW: Highlight matched keyword when search

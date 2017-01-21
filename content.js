@@ -99,7 +99,7 @@
       return true;
     }
   }
-  
+
   function bootstrap() {
     // load resources
     var resources = [
@@ -308,7 +308,7 @@
         var self = this;
         this.$el.html(this.template());
         if ($('#'+this.id).length === 0) {
-          $('body').append(this.el);
+          $('#json-finder-app').append(this.el);
         }
 
         var content = $('');
@@ -366,7 +366,7 @@
           .hide();
         this.$input = this.$('input[name="searchbox"]');
         if ($('#'+this.id).length === 0) {
-          $('body').append(this.el);
+          $('#json-finder-app').append(this.el);
         }
       },
 
@@ -403,7 +403,7 @@
         this.$input.select();
 
         if (keyword == '') return;
-        
+
         if (this.current_keyword !== keyword) {
           // new search
           this.current_keyword = keyword;
@@ -421,7 +421,7 @@
         // show match
         if (this.current_search_results.length > 0) {
           $('.search-status').text((this.current_search_index+1) + ' of ' + this.current_search_results.length);
-          
+
           var location = this.current_search_results[this.current_search_index];
           var paths = location[0].split('/');
           var isValue = !!location[1];
@@ -582,43 +582,51 @@
           item.data('value', value);
           item.data('paths', paths.concat(key));
 
-          item_key.text(key);
+          // item_key.text(key);
+          item_key.html('<span>' + key + '</span>');
 
           switch (typeof value) {
           case 'boolean':
             item_value
               .attr('title', value)
-              .addClass('datatype-boolean').text(value);
+              .addClass('datatype-boolean')
+              .html('<span>' + value + '</span>');
             break;
           case 'number':
             item_value
               .attr('title', value)
-              .addClass('datatype-number').text(value);
+              .addClass('datatype-number')
+              .html('<span>' + value + '</span>');
             break;
           case 'string':
             item_value
               .attr('title', value)
-              .addClass('datatype-string').text(value);
+              .addClass('datatype-string')
+              .html('<span>' + value + '</span>');
             break;
           case 'function':
             item_value
               .attr('title', value.toString())
-              .addClass('datatype-function').text(value.toString());
+              .addClass('datatype-function')
+              .html('<span>' + value.toString() + '</span>');
             break;
           case 'object':
             // array or object
             if (value === null) {
               item_value
               .attr('title', 'null')
-              .addClass('datatype-null').text("");
+              .addClass('datatype-null')
+              .html('<span></span>');
             } else if (Array.isArray(value)) {
               item_value
               .attr('title', 'Array')
-              .addClass('datatype-array').text("Array ("+value.length+")");
+              .addClass('datatype-array')
+              .html('<span>Array (' + value.length + ')</span>');
             } else {
               item_value
               .attr('title', 'Object')
-              .addClass('datatype-object').text("Object");
+              .addClass('datatype-object')
+              .html('<span>Object</span>');
             }
             break;
           default:
@@ -745,7 +753,7 @@
       }
 
     });
-    
+
     var AppModel = Backbone.Model.extend({
 
       defaults: function() {
